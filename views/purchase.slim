@@ -2,3 +2,23 @@ h1 Purchases
 
 - @purchase.each do |p|
   p = p["name"]
+
+h1 Alla köp
+
+form action="/purchase" method="get"
+  input type="text" name="q" placeholder="Sök"
+  button Sök
+
+h2 Lägg till köp
+form action="/purchase" method="post"
+  input type="text" name="name" placeholder="Namn"
+  input type="number" name="cost" placeholder="Pris"
+  button Lägg till
+
+hr
+
+- @purchase.each do |p|
+  div
+    h3 = p["name"]
+    p Kostnad: #{p["cost"]} kr
+    a href="/purchase/#{p["id"]}" Visa
