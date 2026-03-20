@@ -37,7 +37,8 @@ def create_tables(db)
   db.execute('CREATE TABLE IF NOT EXISTS purchase (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL, 
-              type_id TEXT
+              type_id TEXT,
+              cost INTEGER NOT NULL
   )')
 
   db.execute('CREATE TABLE IF NOT EXISTS CATEGORY (
@@ -61,7 +62,7 @@ def populate_tables(db)
   category_count = db.execute("SELECT COUNT(*) AS cnt FROM CATEGORY").first["cnt"]
 
   db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["Elias", "Benis"]) if users_count == 0
-  db.execute('INSERT INTO purchase (name, type_id) VALUES (?, ?)', ["Cheese burger", "3"]) if purchase_count == 0
+  db.execute('INSERT INTO purchase (name, type_id, cost) VALUES (?, ?, ?)', ["Cheese burger", "3", "15"]) if purchase_count == 0
   db.execute('INSERT INTO CATEGORY (name) VALUES (?)', ["FOOD"]) if category_count == 0
 end
 

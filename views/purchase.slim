@@ -20,5 +20,15 @@ hr
 - @purchase.each do |p|
   div
     h3 = p["name"]
-    p Kostnad: #{p["cost"]} kr
-    a href="/purchase/#{p["id"]}" Visa
+    p = "Kostnad: #{p["cost"]} kr"
+
+    a href="/purchase/#{p["id"]}/edit" Redigera
+
+    form action="/purchase/#{p["id"]}/delete" method="post"
+      button Ta bort
+
+/- @purchase.each do |p|
+/  div
+/    h3 = p["name"]
+/    p Kostnad: #{p["cost"]} kr
+/    a href="/purchase/#{p["id"]}" Visa
