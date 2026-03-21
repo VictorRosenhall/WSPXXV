@@ -44,3 +44,26 @@ post('/purchase/:id/delete') do
 
   redirect('/purchase')
 end
+
+get('/purchase/:id/edit') do
+  db = SQLite3::Database.new("db/databas.db")
+  db.results_as_hash = true
+
+  id = params[:id].to_i
+
+  @purchase = db.execute("SELECT * FROM purchase WHERE id = ?", [id]).first
+
+  slim(:edit)
+end
+
+post('/purchase/:id/update') do
+  db = SQLite3::Database.new("db/databas.db")
+
+  id = params[:id].to_i
+  name = params[:name]
+  cost = params[:cost]
+
+  db.execute("UPDATE purchase SET name=?, cost=? WHERE id=?", [name, cost, id])
+
+  redirect('/purchase')
+end

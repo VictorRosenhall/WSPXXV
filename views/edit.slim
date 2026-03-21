@@ -1,0 +1,8 @@
+h1 Redigera köp
+
+form action="/purchase/#{@purchase["id"]}/update" method="post"
+  input type="text" name="name" value=@purchase["name"]
+  input type="number" name="cost" value=@purchase["cost"]
+  button Spara
+
+a href="/purchase" Tillbaka
