@@ -3,6 +3,7 @@ require 'slim'
 require 'sqlite3'
 require 'sinatra/reloader'
 require 'bcrypt'
+require_relative 'model.rb'
 
 enable :sessions
 
@@ -13,8 +14,9 @@ get('/') do
 end
 
 get('/purchase') do
-  query = params[:q]
 
+  query = params[:q]
+  #db = db()
   if query && !query.strip.empty?
     @purchase = db.execute("SELECT * FROM purchase WHERE name LIKE ?", ["%#{query}%"])
   else
@@ -25,7 +27,6 @@ get('/purchase') do
 end
 
 post('/purchase') do
-  db = SQLite3::Database.new("db/databas.db")
 
   name = params[:name]
   cost = params[:cost]
@@ -36,8 +37,6 @@ post('/purchase') do
 end
 
 post('/purchase/:id/delete') do
-  db = SQLite3::Database.new("db/databas.db")
-
   id = params[:id]
 
   db.execute("DELETE FROM purchase WHERE id = ?", [id])
@@ -46,9 +45,6 @@ post('/purchase/:id/delete') do
 end
 
 get('/purchase/:id/edit') do
-  db = SQLite3::Database.new("db/databas.db")
-  db.results_as_hash = true
-
   id = params[:id].to_i
 
   @purchase = db.execute("SELECT * FROM purchase WHERE id = ?", [id]).first
@@ -57,8 +53,6 @@ get('/purchase/:id/edit') do
 end
 
 post('/purchase/:id/update') do
-  db = SQLite3::Database.new("db/databas.db")
-
   id = params[:id].to_i
   name = params[:name]
   cost = params[:cost]
@@ -67,3 +61,43 @@ post('/purchase/:id/update') do
 
   redirect('/purchase')
 end
+
+get('/users') do
+  users = params["users"]
+  pwd = params["pwd"]
+  pwd_confirm = params["pwd_confirm"]
+  result=db.execute("SELECT id FROM users WHERE users=?",users)
+
+  if result.empty?
+    if pwd==pwd_confirm
+      pwd_digest=BCrypt::Password.create(pwd)
+      db.execute("INSERT INTO users(users,pwd_digest) VALUES(?,?)", [users,pwd_digest])
+      redirect('/welcome')
+    else
+      redirect('/error') #om lösenord it matchar
+    end
+  else
+    redirect('/login') #om d redan finns
+  end
+  slim(:register)
+end
+
+get('/login') do
+    users = params["users"]
+    pwd = params["pwd"]
+    result=db.execute("SELECT id, pwd_digest FROM users WHERE users=?",users)
+
+    if result.empty?
+      redirect('/error')
+    end
+    
+    users_id = result.first["id"]
+    pwd_digest = result.first["pwd_digest"]
+
+    if BCrypt::Password.new(pwd_digest) == pwd
+      session[:users_id] = users_id
+      redirect('/welcome')
+    else
+      redirect('/error')
+    end
+  end

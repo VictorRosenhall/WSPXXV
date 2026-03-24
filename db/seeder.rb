@@ -1,6 +1,7 @@
 require 'sqlite3'
 
 DB_FILE = "databas.db"
+
 # Öppna databasen
 @db = SQLite3::Database.new(DB_FILE)
 @db.results_as_hash = true
@@ -37,8 +38,11 @@ def create_tables(db)
   db.execute('CREATE TABLE IF NOT EXISTS purchase (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL, 
-              type_id TEXT,
-              cost INTEGER NOT NULL
+              cost REAL NOT NULL,
+              user_id INTEGER NOT NULL,
+              category_id INTEGER,
+              FOREIGN KEY (user_id) REFERENCES USERS(id),
+              FOREIGN KEY (category_id) REFERENCES CATEGORY(id)
   )')
 
   db.execute('CREATE TABLE IF NOT EXISTS CATEGORY (
@@ -49,6 +53,8 @@ def create_tables(db)
   db.execute('CREATE TABLE IF NOT EXISTS USER_PURCHASE_REL (
               p_id INTEGER,
               u_id INTEGER,
+              status TEXT,
+              amount REAL,
               PRIMARY KEY (p_id, u_id),
               FOREIGN KEY (p_id) REFERENCES purchase(id) ON DELETE CASCADE,
               FOREIGN KEY (u_id) REFERENCES USERS(id) ON DELETE CASCADE
@@ -61,10 +67,19 @@ def populate_tables(db)
   purchase_count = db.execute("SELECT COUNT(*) AS cnt FROM purchase").first["cnt"]
   category_count = db.execute("SELECT COUNT(*) AS cnt FROM CATEGORY").first["cnt"]
 
-  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["Elias", "Benis"]) if users_count == 0
-  db.execute('INSERT INTO purchase (name, type_id, cost) VALUES (?, ?, ?)', ["Cheese burger", "3", "15"]) if purchase_count == 0
-  db.execute('INSERT INTO CATEGORY (name) VALUES (?)', ["FOOD"]) if category_count == 0
-end
+  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["Elias", "Benis"])
 
+  db.execute('INSERT INTO CATEGORY (name) VALUES (?)', ["FOOD"])
+
+  db.execute('INSERT INTO purchase (name, cost, user_id, category_id) VALUES (?, ?, ?, ?)', ["Cheese burgir", 150, 1, 1])
+
+  rel_count = db.execute("SELECT COUNT(*) AS cnt FROM USER_PURCHASE_REL").first["cnt"]
+
+  if rel_count == 0
+    db.execute('INSERT INTO USER_PURCHASE_REL (p_id, u_id, status, amount) VALUES (?, ?, ?, ?)', [1, 1, "paid", 100])
+    db.execute('INSERT INTO USER_PURCHASE_REL (p_id, u_id, status, amount) VALUES (?, ?, ?, ?)', [1, 2, "unpaid", 100])
+    db.execute('INSERT INTO USER_PURCHASE_REL (p_id, u_id, status, amount) VALUES (?, ?, ?, ?)', [1, 3, "unpaid", 100])
+  end
+end
 # Kör seed
 seed!(@db)
