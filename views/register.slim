@@ -1,0 +1,18 @@
+- if session[:user_id]
+  p Du är inloggad
+  a href="/logout" Logga ut
+
+h2 Logga in
+
+form action="/login" method="post"
+  input type="text" name="name" placeholder="Namn"
+  input type="password" name="pwd" placeholder="Lösenord"
+  button Logga in
+
+h2 Skapa konto
+
+form action="/users" method="post"
+  input type="text" name="name" placeholder="Namn"
+  input type="password" name="pwd" placeholder="Lösenord"
+  input type="password" name="pwd_confirm" placeholder="Bekräfta Lösenord"
+  button Skapa konto

@@ -1,7 +1,8 @@
-h1 Purchases
-
-- @purchase.each do |p|
-  p = p["name"]
+- if session[:user_id]
+  p Du är inloggad
+  a href="/logout" Logga ut
+- else
+  a href="/login" Logga in
 
 h1 Alla köp
 
@@ -13,6 +14,12 @@ h2 Lägg till köp
 form action="/purchase" method="post"
   input type="text" name="name" placeholder="Namn"
   input type="number" name="cost" placeholder="Pris"
+    p Dela med:
+  - @users.each do |user|
+    - if user["id"] != session[:user_id] #ser inte de dig själv
+      label
+        input type="checkbox" name="participants[]" value="#{user["id"]}"
+        = user["name"]
   button Lägg till
 
 hr

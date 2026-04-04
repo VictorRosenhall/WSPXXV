@@ -1,4 +1,5 @@
 require 'sqlite3'
+require 'bcrypt'
 
 DB_FILE = "databas.db"
 
@@ -67,7 +68,13 @@ def populate_tables(db)
   purchase_count = db.execute("SELECT COUNT(*) AS cnt FROM purchase").first["cnt"]
   category_count = db.execute("SELECT COUNT(*) AS cnt FROM CATEGORY").first["cnt"]
 
-  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["Elias", "Benis"])
+  pwd = BCrypt::Password.create("admin")
+  pwd2 = BCrypt::Password.create("eliasgoon")
+  pwd3 = BCrypt::Password.create("sebgoon")
+
+  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["Admin_test", pwd])
+  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["eliasgoon", pwd2])
+  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["sebgoon", pwd3])
 
   db.execute('INSERT INTO CATEGORY (name) VALUES (?)', ["FOOD"])
 
@@ -75,6 +82,7 @@ def populate_tables(db)
 
   rel_count = db.execute("SELECT COUNT(*) AS cnt FROM USER_PURCHASE_REL").first["cnt"]
 
+  #borde vara onödiga, gör inget?
   if rel_count == 0
     db.execute('INSERT INTO USER_PURCHASE_REL (p_id, u_id, status, amount) VALUES (?, ?, ?, ?)', [1, 1, "paid", 100])
     db.execute('INSERT INTO USER_PURCHASE_REL (p_id, u_id, status, amount) VALUES (?, ?, ?, ?)', [1, 2, "unpaid", 100])

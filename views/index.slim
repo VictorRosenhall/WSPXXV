@@ -1,1 +1,7 @@
+- if session[:user_id]
+  p Du är inloggad
+  a href="/logout" Logga ut
+- else
+  a href="/login" Logga in
+  
 a href="/purchase" Gå till köp
