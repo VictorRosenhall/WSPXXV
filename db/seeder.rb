@@ -27,6 +27,7 @@ def drop_tables(db)
   db.execute('DROP TABLE IF EXISTS USERS')
   db.execute('DROP TABLE IF EXISTS purchase')
   db.execute('DROP TABLE IF EXISTS CATEGORY')
+  db.execute('DROP TABLE IF EXISTS LOGIN_ATTEMPTS')
 end
 
 def create_tables(db)
@@ -60,6 +61,12 @@ def create_tables(db)
               PRIMARY KEY (p_id, u_id),
               FOREIGN KEY (p_id) REFERENCES purchase(id) ON DELETE CASCADE,
               FOREIGN KEY (u_id) REFERENCES USERS(id) ON DELETE CASCADE
+  )')
+  db.execute('CREATE TABLE IF NOT EXISTS LOGIN_ATTEMPTS (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            time INTEGER NOT NULL,
+            success INTEGER NOT NULL
   )')
 end
 

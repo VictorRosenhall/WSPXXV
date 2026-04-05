@@ -4,6 +4,10 @@
 - else
   a href="/login" Logga in
 
+- if session[:role]
+  p Adminvy
+  a href="/admin"
+
 h1 Alla köp
 
 form action="/purchase" method="get"
