@@ -32,6 +32,15 @@ get('/purchase') do
       WHERE USER_PURCHASE_REL.u_id = ?",
       [session[:user_id]]
     )  end
+  
+    @participants = {}
+    
+    @purchase.each do |p|
+      @participants[p["id"]] = db.execute("SELECT USERS.name, USER_PURCHASE_REL.status, USER_PURCHASE_REL.amount, USER_PURCHASE_REL.u_id
+        FROM USER_PURCHASE_REL
+        JOIN USERS ON USER_PURCHASE_REL.u_id = USERS.id
+        WHERE USER_PURCHASE_REL.p_id = ?", [p["id"]])
+    end
 
   slim(:purchase)
 end
@@ -45,10 +54,10 @@ post('/purchase') do
 
   db.execute("INSERT INTO purchase (name, cost, user_id, category_id) VALUES (?, ?, ?, ?)", [name, cost, session[:user_id], params[:category_id]])
   id = db.last_insert_row_id
-  add_participant(id, session[:user_id], cost.to_f)
+  split = params[:participants] ? cost.to_f / (params[:participants].length + 1) : cost.to_f
+  add_participant(id, session[:user_id], split)
   
   if params[:participants]
-    split = cost.to_f / (params[:participants].length + 1)
     params[:participants].each do |user_id|
       add_participant(id, user_id.to_i, split)
     end
@@ -98,12 +107,12 @@ post('/users') do
     if pwd == pwd_confirm
       pwd_digest = BCrypt::Password.create(pwd)
       db.execute("INSERT INTO USERS(name, pwd_digest) VALUES(?,?)", [user,pwd_digest])
-      redirect('/login')
+      redirect('/users')
     else
       redirect('/error') #om lösenord it matchar
     end
   else
-    redirect('/login') #om d redan finns
+    redirect('/users') #om d redan finns
   end
   slim(:register)
 end
@@ -112,7 +121,7 @@ post('/login') do
   user = params["name"]
   pwd = params["pwd"]
 
-  result = db.execute("SELECT id, pwd_digest FROM USERS WHERE name=?", [user])
+  result = db.execute("SELECT id, pwd_digest, role FROM USERS WHERE name=?", [user])
 
   if result.empty?
     redirect('/error')
@@ -123,6 +132,7 @@ post('/login') do
 
   if BCrypt::Password.new(pwd_digest) == pwd
     session[:user_id] = user_id
+    session[:role] = result.first["role"]
     redirect('/purchase')
   else
     redirect('/error')
@@ -132,4 +142,27 @@ end
 get('/logout') do
   session.clear
   redirect('/users')
+end
+
+get('/admin') do
+  redirect('/purchase') unless session[:role] == 1
+
+  @purchases = db.execute("SELECT purchase.*, USERS.name AS username FROM purchase
+    JOIN USERS ON purchase.user_id = USERS.id")
+  
+  @participants = {}
+  @purchases.each do |purchase|
+    @participants[purchase["id"]] = db.execute("SELECT USERS.name, USER_PURCHASE_REL.status, USER_PURCHASE_REL.amount
+      FROM USER_PURCHASE_REL
+      JOIN USERS ON USER_PURCHASE_REL.u_id = USERS.id
+      WHERE USER_PURCHASE_REL.p_id = ?", [purchase["id"]])
+  end
+
+  slim(:admin)
+end
+
+post('/purchase/:id/pay') do
+  id = params[:id].to_i
+  db.execute("UPDATE USER_PURCHASE_REL SET status = 'paid' WHERE p_id = ? AND u_id = ?", [id, session[:user_id]])
+  redirect('/purchase')
 end

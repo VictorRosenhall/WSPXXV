@@ -1,0 +1,14 @@
+h1 Admin
+
+h2 Alla köp
+
+- @purchases.each do |purchase|
+  div
+    h3 = purchase["name"]
+    p = "Kostnad: #{purchase["cost"]} kr"
+    p = "Skapad av: #{purchase["username"]}"
+    - @participants[purchase["id"]].each do |participant|
+      p
+        | #{participant["name"]} - #{participant["amount"]} kr - #{participant["status"]}
+    hr
+  

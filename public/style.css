@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --border: #2a2a2a;
+  --accent: #c8f135;
+  --text: #f0f0f0;
+  --muted: #666;
+  --danger: #ff4444;
+  --paid: #c8f135;
+  --unpaid: #ff8c42;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+}
+
+/* LAYOUT */
+body > h1:first-of-type {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+}
+
+.container, body > *:not(h1) {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* NAV */
+body > p, body > a {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+}
+
+body > a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* HEADINGS */
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+/* FORMS */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.6rem 0.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  border-color: var(--accent);
+}
+
+/* Sökformulär horisontellt */
+form[action="/purchase"][method="get"] {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+form[action="/purchase"][method="get"] input {
+  flex: 1;
+}
+
+button {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  align-self: flex-start;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+/* Ta bort-knapp */
+form[action$="/delete"] button {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.8rem;
+}
+
+form[action$="/delete"] button:hover {
+  background: var(--danger);
+  color: white;
+}
+
+/* Betald-knapp */
+form[action$="/pay"] button {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  margin-top: 0.3rem;
+}
+
+form[action$="/pay"] button:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* CHECKBOXES */
+label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+label:hover {
+  color: var(--text);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* KÖP-KORT */
+div {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+
+div:hover {
+  border-color: #3a3a3a;
+}
+
+div > p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+/* DELTAGARE */
+div > p[class], div p {
+  font-size: 0.8rem;
+}
+
+/* Status-färger i text */
+p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* LÄNK */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* REGISTER-SIDA */
+h2 + form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}

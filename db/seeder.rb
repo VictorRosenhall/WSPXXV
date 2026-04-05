@@ -33,6 +33,7 @@ def create_tables(db)
   db.execute('CREATE TABLE IF NOT EXISTS USERS (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL, 
+              role INTEGER,
               pwd_digest TEXT
   )')
 
@@ -72,7 +73,7 @@ def populate_tables(db)
   pwd2 = BCrypt::Password.create("eliasgoon")
   pwd3 = BCrypt::Password.create("sebgoon")
 
-  db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["Admin_test", pwd])
+  db.execute('INSERT INTO USERS (name, pwd_digest, role) VALUES (?, ?, ?)', ["Admin_test", pwd, 1])
   db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["eliasgoon", pwd2])
   db.execute('INSERT INTO USERS (name, pwd_digest) VALUES (?, ?)', ["sebgoon", pwd3])
 

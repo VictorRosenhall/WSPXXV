@@ -24,15 +24,40 @@ form action="/purchase" method="post"
 
 hr
 
-- @purchase.each do |p|
+- @purchase.each do |purchase|
   div
-    h3 = p["name"]
-    p = "Kostnad: #{p["cost"]} kr"
+    h3 = purchase["name"]
+    p = "Kostnad: #{purchase["cost"]} kr"
 
-    a href="/purchase/#{p["id"]}/edit" Redigera
+    - @participants[purchase["id"]].each do |participant|
+      p
+        | #{participant["name"]} - #{participant["amount"]} kr - #{participant["status"]}
+      - if participant["u_id"] == session[:user_id]
+        form action="/purchase/#{purchase["id"]}/pay" method="post"
+          button Markera som betald
 
-    form action="/purchase/#{p["id"]}/delete" method="post"
-      button Ta bort
+    a href="/purchase/#{purchase["id"]}/edit" Redigera
+
+    form action="/purchase/#{purchase["id"]}/delete" method="post"
+      button Ta bort  
+
+/- @purchase.each do |p|
+/  div
+/    h3 = p["name"]
+/    p = "Kostnad: #{p["cost"]} kr"
+/    - @participants[p["id"]].each do |participant|
+/      p = "#{participant["name"]} - #{participant["amount"]} kr"
+
+/Behövs inte längre, den andra loopen ersätter den
+/- @purchase.each do |p|
+/  div
+/    h3 = p["name"]
+/    p = "Kostnad: #{p["cost"]} kr"
+/
+/    a href="/purchase/#{p["id"]}/edit" Redigera
+/
+/    form action="/purchase/#{p["id"]}/delete" method="post"
+/      button Ta bort
 
 /- @purchase.each do |p|
 /  div
