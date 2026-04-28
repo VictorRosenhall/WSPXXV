@@ -1,0 +1,14 @@
+h1 Redigera användare (admin)
+
+form action="/admin/users/#{@user["id"]}/update" method="post"
+  input type="text" name="name" value=@user["name"]
+  p Roll:
+  label
+    input type="radio" name="role" value="1"
+    | Admin
+  label
+    input type="radio" name="role" value="0"
+    | Användare
+  button Spara
+
+a href="/admin" Tillbaka

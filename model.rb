@@ -1,5 +1,4 @@
 def db
-  return @db if @db
   @db = SQLite3::Database.new("db/databas.db")
   @db.results_as_hash = true
   return @db
@@ -48,6 +47,30 @@ end
 
 def update_purchase(name, cost, id, user_id)
   db.execute("UPDATE purchase SET name=?, cost=? WHERE id=? AND user_id=?", [name, cost, id, user_id])
+end
+
+def admin_delete_purchase(id)
+  db.execute("DELETE FROM purchase WHERE id = ?", [id])
+end
+
+def admin_update_purchase(name, cost, id)
+  db.execute("UPDATE purchase SET name=?, cost=? WHERE id=?", [name, cost, id])
+end
+
+def get_all_users
+  db.execute("SELECT id, name, role FROM USERS")
+end
+
+def admin_delete_user(id)
+  db.execute("DELETE FROM USERS WHERE id = ?", [id])
+end
+
+def admin_update_user(name, role, id)
+  db.execute("UPDATE USERS SET name=?, role=? WHERE id=?", [name, role, id])
+end
+
+def get_user(id)
+  db.execute("SELECT id, name, role FROM USERS WHERE id=?", [id]).first
 end
 
 def create_user(name, pwd_digest)

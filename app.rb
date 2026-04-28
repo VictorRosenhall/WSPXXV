@@ -31,7 +31,7 @@ get('/purchase') do
       @participants[p["id"]] = get_participants(p["id"])
     end
 
-  slim(:purchase)
+  slim(:"purchase/purchase")
 end
 
 post('/purchase') do
@@ -66,7 +66,7 @@ get('/purchase/:id/edit') do
 
   @purchase = get_purchase(id)
 
-  slim(:edit)
+  slim(:"purchase/edit")
 end
 
 post('/purchase/:id/update') do
@@ -79,8 +79,44 @@ post('/purchase/:id/update') do
   redirect('/purchase')
 end
 
+post('/admin/purchase/:id/delete') do
+  redirect('/purchase') unless session[:role] == 1
+  admin_delete_purchase(params[:id].to_i)
+  redirect('/admin')
+end
+
+get('/admin/purchase/:id/edit') do
+  redirect('/purchase') unless session[:role] == 1
+  @purchase = get_purchase(params[:id].to_i)
+  slim(:admin_edit_purchase)
+end
+
+post('/admin/purchase/:id/update') do
+  redirect('/purchase') unless session[:role] == 1
+  admin_update_purchase(params[:name], params[:cost], params[:id].to_i)
+  redirect('/admin')
+end
+
+post('/admin/users/:id/delete') do
+  redirect('/purchase') unless session[:role] == 1
+  admin_delete_user(params[:id].to_i)
+  redirect('/admin')
+end
+
+get('/admin/users/:id/edit') do
+  redirect('/purchase') unless session[:role] == 1
+  @user = get_user(params[:id].to_i)
+  slim(:admin_edit_user)
+end
+
+post('/admin/users/:id/update') do
+  redirect('/purchase') unless session[:role] == 1
+  admin_update_user(params[:name], params[:role].to_i, params[:id].to_i)
+  redirect('/admin')
+end
+
 get('/users') do
-  slim(:register)
+  slim(:"user/register")
 end
 
 post('/users') do
@@ -96,12 +132,13 @@ post('/users') do
       create_user(user, pwd_digest)
       redirect('/users')
     else
+      session[:error_message] = "Lösenorden matchar inte"
       redirect('/error') #om lösenord it matchar
     end
   else
     redirect('/users') #om d redan finns
   end
-  slim(:register)
+  slim(:"user/register")
 end
 
 post('/login') do
@@ -109,6 +146,7 @@ post('/login') do
   pwd = params["pwd"]
 
   if get_login_attempts(user) >= 5
+    session[:error_message] = "För många loginförsök"
     redirect('/error')
   end
 
@@ -116,6 +154,7 @@ post('/login') do
 
   if result.nil?
     log_attempt(user, 0)
+    session[:error_message] = "Okänd användare"
     redirect('/error')
   end
     
@@ -126,6 +165,7 @@ post('/login') do
     redirect('/purchase')
   else
     log_attempt(user, 0)
+    session[:error_message] = "Lösenord och användare matchar inte"
     redirect('/error')
   end
 end
@@ -139,13 +179,14 @@ get('/admin') do
   redirect('/purchase') unless session[:role] == 1
 
   @purchases = get_all_purchases
+  @users = get_users
   
   @participants = {}
   @purchases.each do |purchase|
     @participants[purchase["id"]] = get_participants(purchase["id"])
   end
 
-  slim(:admin)
+  slim(:"user/admin")
 end
 
 post('/purchase/:id/pay') do
@@ -155,5 +196,14 @@ post('/purchase/:id/pay') do
 end
 
 get('/error') do
+  @error_message = session[:error_message]
   slim(:error)
 end
+
+# SAKER O GÖRA
+
+#- Yardoc
+#- Mer validering, mer än bara eliasgrejen
+#- Finslipa MVC
+#- Finslipa namngivning enl restful, mappstruktur
+#- CRUD admin

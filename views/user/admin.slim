@@ -1,0 +1,26 @@
+h1 Admin
+
+h2 Alla köp
+
+- @purchases.each do |purchase|
+  div
+    h3 = purchase["name"]
+    p = "Kostnad: #{purchase["cost"]} kr"
+    p = "Skapad av: #{purchase["username"]}"
+    - @participants[purchase["id"]].each do |participant|
+      p
+        | #{participant["name"]} - #{participant["amount"]} kr - #{participant["status"]}
+    a href="/admin/purchase/#{purchase["id"]}/edit" Redigera
+    form action="/admin/purchase/#{purchase["id"]}/delete" method="post"
+      button Ta bort
+    hr
+
+h2 Alla användare
+
+- @users.each do |user|
+  div
+    p = "#{user["name"]} - #{user["role"] == 1 ? "Admin" : "Användare"}"
+    a href="/admin/users/#{user["id"]}/edit" Redigera
+    form action="/admin/users/#{user["id"]}/delete" method="post"
+      button Ta bort
+  
