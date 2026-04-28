@@ -7,8 +7,6 @@ require_relative 'model.rb'
 
 enable :sessions
 
-DB_FILE = "db/databas.db" #används inte längre? ta bort?
-
 get('/') do
   slim(:index)
 end
@@ -66,7 +64,7 @@ get('/purchase/:id/edit') do
 
   @purchase = get_purchase(id)
 
-  slim(:"purchase/edit")
+  slim(:'purchase/edit')
 end
 
 post('/purchase/:id/update') do
@@ -88,7 +86,7 @@ end
 get('/admin/purchase/:id/edit') do
   redirect('/purchase') unless session[:role] == 1
   @purchase = get_purchase(params[:id].to_i)
-  slim(:admin_edit_purchase)
+  slim(:'admin/admin_edit_purchase')
 end
 
 post('/admin/purchase/:id/update') do
@@ -106,7 +104,7 @@ end
 get('/admin/users/:id/edit') do
   redirect('/purchase') unless session[:role] == 1
   @user = get_user(params[:id].to_i)
-  slim(:admin_edit_user)
+  slim(:'admin/admin_edit_user')
 end
 
 post('/admin/users/:id/update') do
@@ -116,7 +114,7 @@ post('/admin/users/:id/update') do
 end
 
 get('/users') do
-  slim(:"user/register")
+  slim(:'user/register')
 end
 
 post('/users') do
@@ -186,7 +184,7 @@ get('/admin') do
     @participants[purchase["id"]] = get_participants(purchase["id"])
   end
 
-  slim(:"user/admin")
+  slim(:'admin/admin')
 end
 
 post('/purchase/:id/pay') do
