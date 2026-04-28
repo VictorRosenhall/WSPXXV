@@ -7,10 +7,18 @@ require_relative 'model.rb'
 
 enable :sessions
 
+include Model
+
+# @route GET /
+# @return [slim] renderar startsidan
 get('/') do
   slim(:index)
 end
 
+# @route GET /purchase
+# @param [String] q sökterm för att filtrera köp (valfri)
+# @return [slim] renderar purchase-vyn med köp och deltagare
+# @note Kräver inloggning, redirectar till /users om ej inloggad
 get('/purchase') do
   redirect('/users') unless session[:user_id]
 
@@ -32,6 +40,11 @@ get('/purchase') do
   slim(:"purchase/purchase")
 end
 
+# @route POST /purchase
+# @param [String] name namn på köpet
+# @param [Float] cost kostnad för köpet
+# @param [Array] participants lista med user_ids att dela köpet med (valfri)
+# @return [redirect] redirectar till /purchase
 post('/purchase') do
 
   name = params[:name]
@@ -50,6 +63,9 @@ post('/purchase') do
   redirect('/purchase')
 end
 
+# @route POST /purchase/:id/delete
+# @param [Integer] id köpets id
+# @return [redirect] redirectar till /purchase
 post('/purchase/:id/delete') do
   id = params[:id]
 
@@ -58,6 +74,10 @@ post('/purchase/:id/delete') do
   redirect('/purchase')
 end
 
+# @route GET /purchase/:id/edit
+# @param [Integer] id köpets id
+# @return [slim] renderar edit-vyn
+# @note Kräver inloggning
 get('/purchase/:id/edit') do
   redirect('/users') unless session[:user_id]
   id = params[:id].to_i
@@ -67,6 +87,11 @@ get('/purchase/:id/edit') do
   slim(:'purchase/edit')
 end
 
+# @route POST /purchase/:id/update
+# @param [Integer] id köpets id
+# @param [String] name nytt namn
+# @param [Float] cost ny kostnad
+# @return [redirect] redirectar till /purchase
 post('/purchase/:id/update') do
   id = params[:id].to_i
   name = params[:name]
@@ -77,46 +102,81 @@ post('/purchase/:id/update') do
   redirect('/purchase')
 end
 
+# @route POST /admin/purchase/:id/delete
+# @param [Integer] id köpets id
+# @return [redirect] redirectar till /admin
+# @note Kräver adminbehörighet
 post('/admin/purchase/:id/delete') do
   redirect('/purchase') unless session[:role] == 1
   admin_delete_purchase(params[:id].to_i)
   redirect('/admin')
 end
 
+# @route GET /admin/purchase/:id/edit
+# @param [Integer] id köpets id
+# @return [slim] renderar admin_edit_purchase-vyn
+# @note Kräver adminbehörighet
 get('/admin/purchase/:id/edit') do
   redirect('/purchase') unless session[:role] == 1
   @purchase = get_purchase(params[:id].to_i)
   slim(:'admin/admin_edit_purchase')
 end
 
+# @route POST /admin/purchase/:id/update
+# @param [Integer] id köpets id
+# @param [String] name nytt namn
+# @param [Float] cost ny kostnad
+# @return [redirect] redirectar till /admin
+# @note Kräver adminbehörighet
 post('/admin/purchase/:id/update') do
   redirect('/purchase') unless session[:role] == 1
   admin_update_purchase(params[:name], params[:cost], params[:id].to_i)
   redirect('/admin')
 end
 
+# @route POST /admin/users/:id/delete
+# @param [Integer] id användarens id
+# @return [redirect] redirectar till /admin
+# @note Kräver adminbehörighet
 post('/admin/users/:id/delete') do
   redirect('/purchase') unless session[:role] == 1
   admin_delete_user(params[:id].to_i)
   redirect('/admin')
 end
 
+# @route GET /admin/users/:id/edit
+# @param [Integer] id användarens id
+# @return [slim] renderar admin_edit_user-vyn
+# @note Kräver adminbehörighet
 get('/admin/users/:id/edit') do
   redirect('/purchase') unless session[:role] == 1
   @user = get_user(params[:id].to_i)
   slim(:'admin/admin_edit_user')
 end
 
+# @route POST /admin/users/:id/update
+# @param [Integer] id användarens id
+# @param [String] name nytt namn
+# @param [Integer] role ny roll (1=admin, 0=användare)
+# @return [redirect] redirectar till /admin
+# @note Kräver adminbehörighet
 post('/admin/users/:id/update') do
   redirect('/purchase') unless session[:role] == 1
   admin_update_user(params[:name], params[:role].to_i, params[:id].to_i)
   redirect('/admin')
 end
 
+# @route GET /users
+# @return [slim] renderar register-vyn med inloggning och registrering
 get('/users') do
   slim(:'user/register')
 end
 
+# @route POST /users
+# @param [String] name användarnamn
+# @param [String] pwd lösenord
+# @param [String] pwd_confirm lösenordsbekräftelse
+# @return [redirect] redirectar till /users eller /error
 post('/users') do
   user = params["name"]
   pwd = params["pwd"]
@@ -139,6 +199,11 @@ post('/users') do
   slim(:"user/register")
 end
 
+# @route POST /login
+# @param [String] name användarnamn
+# @param [String] pwd lösenord
+# @return [redirect] redirectar till /purchase eller /error
+# @note Loggar inloggningsförsök och blockerar efter 5 misslyckade försök inom 5 minuter
 post('/login') do
   user = params["name"]
   pwd = params["pwd"]
@@ -168,11 +233,16 @@ post('/login') do
   end
 end
 
+# @route GET /logout
+# @return [redirect] rensar sessionen och redirectar till /users
 get('/logout') do
   session.clear
   redirect('/users')
 end
 
+# @route GET /admin
+# @return [slim] renderar admin-vyn med alla köp och användare
+# @note Kräver adminbehörighet
 get('/admin') do
   redirect('/purchase') unless session[:role] == 1
 
@@ -187,12 +257,17 @@ get('/admin') do
   slim(:'admin/admin')
 end
 
+# @route POST /purchase/:id/pay
+# @param [Integer] id köpets id
+# @return [redirect] redirectar till /purchase
 post('/purchase/:id/pay') do
   id = params[:id].to_i
   pay_purchase(id, session[:user_id])
   redirect('/purchase')
 end
 
+# @route GET /error
+# @return [slim] renderar error-vyn med felmeddelande från sessionen
 get('/error') do
   @error_message = session[:error_message]
   slim(:error)
@@ -200,8 +275,7 @@ end
 
 # SAKER O GÖRA
 
-#- Yardoc
-#- Mer validering, mer än bara eliasgrejen
-#- Finslipa MVC
-#- Finslipa namngivning enl restful, mappstruktur
-#- CRUD admin
+#- Mer validering (mer än bara eliasgrejen?)
+#- Finslipa MVC, (bcrypt -> modellen)
+#- Finslipa namngivning enl restful, mappstruktur (purchase -> purhases?)
+#- validering

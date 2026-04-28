@@ -1,3 +1,5 @@
+module Model
+
 def db
   if @db.nil?
     @db = SQLite3::Database.new("db/databas.db")
