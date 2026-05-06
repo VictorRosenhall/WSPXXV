@@ -56,6 +56,11 @@ post('/purchase') do
   name = params[:name]
   cost = params[:cost]
 
+  if valid_purchase?(name, cost) == false
+    session[:error_message] = "Felaktigt angivet köp"
+    redirect('/error')
+  end
+
   id = create_purchase(name, cost, session[:user_id], params[:category_id])
 
   split = params[:participants] ? cost.to_f / (params[:participants].length + 1) : cost.to_f
@@ -181,6 +186,11 @@ post('/users') do
   pwd = params["pwd"]
   pwd_confirm = params["pwd_confirm"]
 
+  if valid_user?(user, pwd) == false
+    session[:error_message] = "Felaktigt ifyllda uppgifter"
+    redirect('/error')
+  end
+
   result = find_user(user)
 
   if result.empty?
@@ -269,14 +279,13 @@ get('/error') do
   slim(:error)
 end
 
-# SAKER O GÖRA
-
-#- Mer validering (mer än bara eliasgrejen?)
-#- Finslipa MVC, (bcrypt -> modellen)
-#- before block
 
 # HAR GJORT
 
+#- Finslipa MVC, (bcrypt -> modellen)
+#- before block
 #- Restful
 #- CRUD Admin
 #- Cooldown
+#- Mer validering (mer än bara eliasgrejen?)
+#- Yardoc

@@ -113,3 +113,19 @@ module Model
     db.execute("INSERT INTO LOGIN_ATTEMPTS (name, time, success) VALUES (?, ?, ?)", [name, Time.now.to_i, success])
   end
 end
+
+def valid_purchase?(name, cost)
+  if !name.nil? && !name.strip.empty? && !cost.nil? && cost.to_f > 0
+    return true
+  else
+    return false
+  end
+end
+
+def valid_user?(name, pwd)
+  if !name.nil? && !name.strip.empty? && !pwd.nil? && pwd.length >= 6
+    return true
+  else
+    return false
+  end
+end
