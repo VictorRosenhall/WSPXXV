@@ -9,6 +9,14 @@ enable :sessions
 
 include Model
 
+before '/purchase*' do
+  redirect('/users') unless session[:user_id]
+end
+
+before '/admin*' do
+  redirect('/purchase') unless session[:role] == 1
+end
+
 # @route GET /
 # @return [slim] renderar startsidan
 get('/') do
@@ -20,8 +28,6 @@ end
 # @return [slim] renderar purchase-vyn med köp och deltagare
 # @note Kräver inloggning, redirectar till /users om ej inloggad
 get('/purchase') do
-  redirect('/users') unless session[:user_id]
-
   @users = get_users
   query = params[:q]
 
@@ -79,7 +85,6 @@ end
 # @return [slim] renderar edit-vyn
 # @note Kräver inloggning
 get('/purchase/:id/edit') do
-  redirect('/users') unless session[:user_id]
   id = params[:id].to_i
 
   @purchase = get_purchase(id)
@@ -107,7 +112,6 @@ end
 # @return [redirect] redirectar till /admin
 # @note Kräver adminbehörighet
 post('/admin/purchase/:id/delete') do
-  redirect('/purchase') unless session[:role] == 1
   admin_delete_purchase(params[:id].to_i)
   redirect('/admin')
 end
@@ -117,7 +121,6 @@ end
 # @return [slim] renderar admin_edit_purchase-vyn
 # @note Kräver adminbehörighet
 get('/admin/purchase/:id/edit') do
-  redirect('/purchase') unless session[:role] == 1
   @purchase = get_purchase(params[:id].to_i)
   slim(:'admin/admin_edit_purchase')
 end
@@ -129,7 +132,6 @@ end
 # @return [redirect] redirectar till /admin
 # @note Kräver adminbehörighet
 post('/admin/purchase/:id/update') do
-  redirect('/purchase') unless session[:role] == 1
   admin_update_purchase(params[:name], params[:cost], params[:id].to_i)
   redirect('/admin')
 end
@@ -139,7 +141,6 @@ end
 # @return [redirect] redirectar till /admin
 # @note Kräver adminbehörighet
 post('/admin/users/:id/delete') do
-  redirect('/purchase') unless session[:role] == 1
   admin_delete_user(params[:id].to_i)
   redirect('/admin')
 end
@@ -149,7 +150,6 @@ end
 # @return [slim] renderar admin_edit_user-vyn
 # @note Kräver adminbehörighet
 get('/admin/users/:id/edit') do
-  redirect('/purchase') unless session[:role] == 1
   @user = get_user(params[:id].to_i)
   slim(:'admin/admin_edit_user')
 end
@@ -161,7 +161,6 @@ end
 # @return [redirect] redirectar till /admin
 # @note Kräver adminbehörighet
 post('/admin/users/:id/update') do
-  redirect('/purchase') unless session[:role] == 1
   admin_update_user(params[:name], params[:role].to_i, params[:id].to_i)
   redirect('/admin')
 end
@@ -186,8 +185,7 @@ post('/users') do
 
   if result.empty?
     if pwd == pwd_confirm
-      pwd_digest = BCrypt::Password.create(pwd)
-      create_user(user, pwd_digest)
+      create_user(user, pwd)
       redirect('/users')
     else
       session[:error_message] = "Lösenorden matchar inte"
@@ -221,7 +219,7 @@ post('/login') do
     redirect('/error')
   end
     
-  if BCrypt::Password.new(result["pwd_digest"]) == pwd
+  if authenticate_user(result["pwd_digest"], pwd)
     log_attempt(user, 1)
     session[:user_id] = result["id"]
     session[:role] = result["role"]
@@ -244,8 +242,6 @@ end
 # @return [slim] renderar admin-vyn med alla köp och användare
 # @note Kräver adminbehörighet
 get('/admin') do
-  redirect('/purchase') unless session[:role] == 1
-
   @purchases = get_all_purchases
   @users = get_users
   
@@ -277,5 +273,10 @@ end
 
 #- Mer validering (mer än bara eliasgrejen?)
 #- Finslipa MVC, (bcrypt -> modellen)
-#- Finslipa namngivning enl restful, mappstruktur (purchase -> purhases?)
-#- validering
+#- before block
+
+# HAR GJORT
+
+#- Restful
+#- CRUD Admin
+#- Cooldown
